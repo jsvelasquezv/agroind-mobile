@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="es" ng-app="agroind">
+<head>
+  <meta charset="UTF-8">
+  <meta name="format-detection" content="telephone=no" />
+    <meta name="msapplication-tap-highlight" content="no" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta http-equiv="Content-Security-Policy" content="default-src * 'unsafe-inline'; style-src 'self' 'unsafe-inline'; media-src *" />
+  <title>Agroind</title>
+  
+  <link rel="stylesheet" href="../bower_components/Materialize/dist/css/materialize.min.css">
+  <link href="http://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/custom.css">
+  <link rel="stylesheet" href="../bower_components/angular-loading-bar/build/loading-bar.min.css">
+
+  <!-- Load jQuery -->
+  <script type="text/javascript" src="../bower_components/jquery/dist/jquery.min.js" onload="window.$ = window.jQuery = module.exports;"></script>
+  <script>window.Hammer = require("../bower_components/Materialize/js/hammer.min.js");</script>
+
+  <!-- Load materialize -->
+  <script src="../bower_components/Materialize/dist/js/materialize.min.js"></script>
+
+  <!-- Load angular -->
+  <script src="../bower_components/angular/angular.min.js"></script>
+  <script src="../bower_components/angular-ui-router/release/angular-ui-router.min.js"></script>
+  <script src="../bower_components/angular-cookie/angular-cookie.min.js"></script>
+  <script src="../bower_components/ng-token-auth/dist/ng-token-auth.min.js"></script>
+  <script src="../bower_components/angular-loading-bar/build/loading-bar.min.js"></script>
+  <!-- <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.5.7/angular-animate.js"></script> -->
+  <script src="../bower_components/angular-animate/angular-animate.min.js"></script>
+  <script src="../bower_components/angular-messages/angular-messages.min.js"></script>
+  <script src="app.js"></script>
+  <script src="services/users.js"></script>
+  <script src="services/profiles.js"></script>
+  <script src="services/lands.js"></script>
+  <script src="services/indicators.js"></script>
+  <script src="services/variables.js"></script>
+  <!-- <script src="/controllers/mainController.js"></script> -->
+  <!-- <script src="/controllers/authController.js"></script> -->
+  
+  <!-- Load js assets -->
+  <script src="../app/assets/js/custom.js"></script>
+
+</head>
+<body ng-controller="mainController" class="grey lighten-5">
+    
+    <main ng-class="{ 'full-width': !loggedIn }">
+      <nav class="teal">
+        <div class="nav-wrapper">
+            <a href="#" data-activates="slide-out" class="button-collapse"><i class="material-icons">menu</i></a>
+            <a href="#" class="brand-logo center">Agroind</a>
+        </div>
+        <ul ng-show="loggedIn" id="slide-out" class="side-nav fixed show-on-small">
+
+            <li>
+              <a ui-sref="home" class="collapsible-header" ng-show="loggedIn">
+                <i class="material-icons menu-icons">dashboard</i>
+                Inicio
+              </a>
+            </li>  
+            <!-- <li>
+              <a ui-sref="login" class="collapsible-header" ng-hide="loggedIn">
+                  <i class="material-icons menu-icons small">open_in_browser</i>
+                  Iniciar sesion
+              </a>
+            </li> -->
+            <li>
+              <a ui-sref="myAccount" class="collapsible-header" ng-show="loggedIn">
+                <i class="material-icons menu-icons">picture_in_picture</i>
+                Mi cuenta
+              </a>
+            </li>
+            <!-- <li>
+              <a ui-sref="signup" ng-hide="loggedIn">Registrarse</a></li>
+            </li> -->
+            <!-- <li>
+              <a ui-sref="profiles" ng-show="loggedIn && loggedProfile.profiles_permission">Gestionar Perfiles</a>
+            </li> -->
+
+            <li class="no-padding" ng-show="loggedIn && loggedProfile.profiles_permission">
+              <ul class="collapsible collapsible-accordion">
+                <li>
+                  <a class="collapsible-header">
+                    <i class="material-icons menu-icons">assignment_ind</i>
+                    Gestionar Perfiles
+                  </a>
+                  <div class="collapsible-body">
+                    <ul>
+                      <li ng-show="loggedIn && loggedProfile.list_profiles">
+                        <a ui-sref="profiles">Listado de Perfiles</a>
+                      </li>
+                      <li ng-show="loggedIn && loggedProfile.create_profiles">
+                        <a ui-sref="newProfile">Crear Perfil</a>
+                      </li>
+                    </ul>
+                  </div>
+                </li>
+              </ul>
+            </li>
+
+            <li class="no-padding" ng-show="loggedIn && loggedProfile.users_permission">
+              <ul class="collapsible collapsible-accordion">
+                <li>
+                  <a class="collapsible-header">
+                    <i class="material-icons menu-icons">supervisor_account</i>
+                    Gestionar Usuarios
+                  </a>
+                  <div class="collapsible-body">
+                    <ul>
+                      <li ng-show="loggedIn && loggedProfile.list_users">
+                        <a ui-sref="users">Listado de Usuarios</a>
+                      </li>
+                      <li>
+                        <a ui-sref="signup">Crear Usuario</a></li>
+                    </ul>
+                  </div>
+                </li>
+              </ul>
+            </li>
+
+            <li class="no-padding" ng-show="loggedIn && loggedProfile.indicators_permission">
+              <ul class="collapsible collapsible-accordion">
+                <li>
+                  <a class="collapsible-header">
+                    <i class="material-icons menu-icons">trending_up</i>
+                    Indicadores
+                  </a>
+                  <div class="collapsible-body">
+                    <ul>
+                      <li><a ui-sref="indicators">Listado de Indicatores</a></li>
+                      <li><a ui-sref="newIndicator">Crear Indicador</a></li>
+                      <li><a ui-sref="lands">Listado de Fincas</a></li>
+                      <li><a ui-sref="newLand">Registrar Finca</a></li>
+                    </ul>
+                  </div>
+                </li>
+              </ul>
+            </li>
+
+            <li class="no-padding" ng-show="loggedIn && loggedProfile.reports_permission">
+              <ul class="collapsible collapsible-accordion">
+                <li>
+                  <a class="collapsible-header">
+                    <i class="material-icons menu-icons">description</i>
+                    Reportes
+                  </a>
+                  <div class="collapsible-body">
+                    <ul>
+                      <li ng-show="loggedIn && loggedProfile.list_users">
+                        <a ui-sref="users">Listado de usuarios</a>
+                      </li>
+                      <li><a ui-sref="signup">Crear Usuario</a></li>
+                    </ul>
+                  </div>
+                </li>
+              </ul>
+            </li>
+
+            <li class="no-padding" ng-show="loggedIn && loggedProfile.statistics_permission">
+              <ul class="collapsible collapsible-accordion">
+                <li>
+                  <a class="collapsible-header">
+                    <i class="material-icons menu-icons">assessment</i>
+                    Estadistica
+                  </a>
+                  <div class="collapsible-body">
+                    <ul>
+                      <li ng-show="loggedIn && loggedProfile.list_users">
+                        <a ui-sref="users">Listado de usuarios</a>
+                      </li>
+                      <li><a ui-sref="signup">Crear Usuario</a></li>
+                    </ul>
+                  </div>
+                </li>
+              </ul>
+            </li>
+
+            <li>
+              <a ng-click='signOut()' class="collapsible-header" ng-show="loggedIn">
+                <i class="material-icons menu-icons">power_settings_new</i>
+                Cerrar sesion</a>  
+            </li>
+        </ul>
+      </nav>
+
+      <div class="container">
+        <div ui-view></div>
+      </div>
+        <!-- <span us-spinner="{radius:30, width:8, length: 16}"></span> -->
+        <a href="" ng-click="showAll()">Consultar usuarios </a>
+        <a href="" ng-click="checkLogin()">Cambiar logueo </a>
+        <!-- <button class="btn btn-primary btn-lg" ng-click='signOut()'>Sign out</button> -->
+    </main>
+<script type="text/javascript" src="cordova.js"></script>
+<script>
+        app.initialize();
+  
+</script>
+</body>
+</html>
