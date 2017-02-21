@@ -3,32 +3,35 @@
 <head>
   <meta charset="UTF-8">
   <meta name="format-detection" content="telephone=no" />
-    <meta name="msapplication-tap-highlight" content="no" />
+  <meta name="msapplication-tap-highlight" content="no" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <meta http-equiv="Content-Security-Policy" content="default-src * 'unsafe-inline'; style-src 'self' 'unsafe-inline'; media-src *" />
+  <meta http-equiv="Content-Security-Policy" content="default-src * 'unsafe-inline'; style-src * 'unsafe-inline'; media-src *" />
   <title>Agroind</title>
   
-  <link rel="stylesheet" href="../bower_components/Materialize/dist/css/materialize.min.css">
+  <link rel="stylesheet" href="bower_components/Materialize/dist/css/materialize.min.css">
   <link href="http://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <link rel="stylesheet" href="assets/css/custom.css">
-  <link rel="stylesheet" href="../bower_components/angular-loading-bar/build/loading-bar.min.css">
+  <link rel="stylesheet" href="bower_components/angular-loading-bar/build/loading-bar.min.css">
+
+  <!-- <script src="js/index.js"></script> -->
 
   <!-- Load jQuery -->
-  <script type="text/javascript" src="../bower_components/jquery/dist/jquery.min.js" onload="window.$ = window.jQuery = module.exports;"></script>
-  <script>window.Hammer = require("../bower_components/Materialize/js/hammer.min.js");</script>
+  <!-- <script type="text/javascript" src="../bower_components/jquery/dist/jquery.min.js" onload="window.$ = window.jQuery = module.exports;"></script> -->
+  <script src="bower_components/jquery/dist/jquery.min.js"></script>
+  <script src="bower_components/Materialize/js/hammer.min.js"></script>
 
   <!-- Load materialize -->
-  <script src="../bower_components/Materialize/dist/js/materialize.min.js"></script>
+  <script src="bower_components/Materialize/dist/js/materialize.min.js"></script>
 
   <!-- Load angular -->
-  <script src="../bower_components/angular/angular.min.js"></script>
-  <script src="../bower_components/angular-ui-router/release/angular-ui-router.min.js"></script>
-  <script src="../bower_components/angular-cookie/angular-cookie.min.js"></script>
-  <script src="../bower_components/ng-token-auth/dist/ng-token-auth.min.js"></script>
-  <script src="../bower_components/angular-loading-bar/build/loading-bar.min.js"></script>
+  <script src="bower_components/angular/angular.min.js"></script>
+  <script src="bower_components/angular-ui-router/release/angular-ui-router.min.js"></script>
+  <script src="bower_components/angular-cookie/angular-cookie.min.js"></script>
+  <script src="bower_components/ng-token-auth/dist/ng-token-auth.min.js"></script>
+  <script src="bower_components/angular-loading-bar/build/loading-bar.min.js"></script>
   <!-- <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.5.7/angular-animate.js"></script> -->
-  <script src="../bower_components/angular-animate/angular-animate.min.js"></script>
-  <script src="../bower_components/angular-messages/angular-messages.min.js"></script>
+  <script src="bower_components/angular-animate/angular-animate.min.js"></script>
+  <script src="bower_components/angular-messages/angular-messages.min.js"></script>
   <script src="app.js"></script>
   <script src="services/users.js"></script>
   <script src="services/profiles.js"></script>
@@ -39,7 +42,7 @@
   <!-- <script src="/controllers/authController.js"></script> -->
   
   <!-- Load js assets -->
-  <script src="../app/assets/js/custom.js"></script>
+  <script src="assets/js/custom.js"></script>
 
 </head>
 <body ng-controller="mainController" class="grey lighten-5">
@@ -193,7 +196,7 @@
     </main>
 <script type="text/javascript" src="cordova.js"></script>
 <script>
-        app.initialize();
+        // app.initialize();
   
 </script>
 </body>
