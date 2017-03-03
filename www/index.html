@@ -23,8 +23,9 @@
   <!-- Load materialize -->
   <script src="bower_components/Materialize/dist/js/materialize.min.js"></script>
 
-  <!-- Load angular -->
+   <!-- Load angular -->
   <script src="bower_components/angular/angular.min.js"></script>
+  <script src="node_modules/pouchdb/dist/pouchdb.min.js"></script>
   <script src="bower_components/angular-ui-router/release/angular-ui-router.min.js"></script>
   <script src="bower_components/angular-cookie/angular-cookie.min.js"></script>
   <script src="bower_components/ng-token-auth/dist/ng-token-auth.min.js"></script>
@@ -32,17 +33,20 @@
   <!-- <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.5.7/angular-animate.js"></script> -->
   <script src="bower_components/angular-animate/angular-animate.min.js"></script>
   <script src="bower_components/angular-messages/angular-messages.min.js"></script>
+  <script src="bower_components/angular-pouchdb/angular-pouchdb.min.js"></script>
   <script src="app.js"></script>
+  <!-- <script src="services/connectionStatus.js"></script> -->
   <script src="services/users.js"></script>
   <script src="services/profiles.js"></script>
   <script src="services/lands.js"></script>
   <script src="services/indicators.js"></script>
   <script src="services/variables.js"></script>
+  <script src="services/evaluations.js"></script>
   <!-- <script src="/controllers/mainController.js"></script> -->
   <!-- <script src="/controllers/authController.js"></script> -->
   
   <!-- Load js assets -->
-  <script src="assets/js/custom.js"></script>
+  <script src="../app/assets/js/custom.js"></script>
 
 </head>
 <body ng-controller="mainController" class="grey lighten-5">
@@ -80,7 +84,7 @@
               <a ui-sref="profiles" ng-show="loggedIn && loggedProfile.profiles_permission">Gestionar Perfiles</a>
             </li> -->
 
-            <li class="no-padding" ng-show="loggedIn && loggedProfile.profiles_permission">
+            <li class="no-padding" ng-show="loggedIn && loggedProfile.profiles_permission && online=='on'">
               <ul class="collapsible collapsible-accordion">
                 <li>
                   <a class="collapsible-header">
@@ -114,7 +118,7 @@
                         <a ui-sref="users">Listado de Usuarios</a>
                       </li>
                       <li>
-                        <a ui-sref="signup">Crear Usuario</a></li>
+                        <a ui-sref="newUser">Crear Usuario</a></li>
                     </ul>
                   </div>
                 </li>
@@ -130,10 +134,20 @@
                   </a>
                   <div class="collapsible-body">
                     <ul>
-                      <li><a ui-sref="indicators">Listado de Indicatores</a></li>
+                      <li><a ui-sref="indicators">Listado de Indicadores</a></li>
+                      <li><a ui-sref="localIndicators">Listado de Indicadores Local</a></li>
                       <li><a ui-sref="newIndicator">Crear Indicador</a></li>
+                      <li><a ui-sref="variables">Listado de Variables</a></li>
+                      <li><a ui-sref="localVariables">Listado de Variables Local</a></li>
+                      <li><a ui-sref="newVariable">Crear Variable</a></li>
                       <li><a ui-sref="lands">Listado de Fincas</a></li>
+                      <li><a ui-sref="localLands">Listado de Fincas Local</a></li>
                       <li><a ui-sref="newLand">Registrar Finca</a></li>
+                      <li><a ui-sref="evaluations">Listado de Evaluaciones</a></li>
+                      <li><a ui-sref="localEvaluations">Listado de Evaluaciones Local</a></li>
+                      <li><a ui-sref="newEvaluation">Asignar Evaluacion</a></li>
+                      <li><a ui-sref="newLocalEvaluation">Asignar Evaluacion Local</a></li>
+                      <!-- <li><a ui-sref="newCalification">Calificar evaluaciones</a></li> -->
                     </ul>
                   </div>
                 </li>
@@ -186,18 +200,33 @@
         </ul>
       </nav>
 
+      <div class="notification blue white-text row" ng-show="online == 'off'">
+        <div class="col right">
+          <a href="" class="btn btn-flat white-text waves-effect waves-light blue" style="text-transform: capitalize;">
+            <i class="material-icons left" style="margin-right: 0;">swap_vert</i>Volver a conectar.
+          </a>
+        </div>
+      </div>
       <div class="container">
         <div ui-view></div>
       </div>
         <!-- <span us-spinner="{radius:30, width:8, length: 16}"></span> -->
         <a href="" ng-click="showAll()">Consultar usuarios </a>
         <a href="" ng-click="checkLogin()">Cambiar logueo </a>
+        <a href="" ng-click="infoDB()">Info db</a>
+        <a href="" ng-click="deleteDB()">Delete db</a>
+<a ui-sref="home">Home</a>
+        
         <!-- <button class="btn btn-primary btn-lg" ng-click='signOut()'>Sign out</button> -->
+        <button class="btn btn-primary" ng-click="add()">Add</button>
+<!-- <div>
+  <ul>
+    <li ng-repeat="doc in docs">
+      <code ng-bind="doc | json"></code>
+    </li>
+  </ul>
+</div> -->
     </main>
 <script type="text/javascript" src="cordova.js"></script>
-<script>
-        // app.initialize();
-  
-</script>
 </body>
 </html>

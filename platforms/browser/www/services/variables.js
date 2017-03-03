@@ -1,7 +1,8 @@
 var variablesService = angular.module("variablesService", []);
 
-variablesService.service('Variables', function ($http, config) {
+variablesService.service('Variables', function ($http, config, pouchDB) {
 var variablesUrl = config.apiUrl + '/variables';
+var variablesDB = pouchDB("variablesDB");
 // console.log(variablesUrl);
 
   // Returns one profile
@@ -14,13 +15,8 @@ var variablesUrl = config.apiUrl + '/variables';
     return $http.get(variablesUrl);
   }
 
-  this.newVariable = function (name, optimun_rating, indicators_id) {
-    var data = {
-      name :name,
-      optimun_rating :optimun_rating,
-      indicators_id :indicators_id,
-    };
-    return $http.post(variablesUrl, data);
+  this.newVariable = function (variable) {
+    return $http.post(variablesUrl, variable);
   }
 
   this.editVariable = function (name, optimun_rating, indicators_id) {
@@ -32,7 +28,41 @@ var variablesUrl = config.apiUrl + '/variables';
     return $http.patch(variablesUrl + '/' + id, data);
   }
 
-  this.deleteVariable = function (id) {
-    return $http.delete(variablesUrl + '/' + id);
+  // this.deleteVariable = function (id) {
+  //   return $http.delete(variablesUrl + '/' + id);
+  // }
+
+  this.saveToLocal = function (variables) {
+    return variablesDB.destroy()
+      .then(function (response) {
+        console.log(response);
+        variablesDB = pouchDB("variablesDB");
+        variablesToPouch = setIdsToVariables(variables)
+        return variablesDB.bulkDocs(variablesToPouch);
+      })
+      .catch(function (error) {
+        console.log(error);
+        // return indicatorsDB.bulkDocs(indicatorsToPouch);
+      });
   }
+
+  this.loadFromLocal = function () {
+    return variablesDB.allDocs({
+      include_docs: true,
+      attachments: true
+    });
+  }
+
+  // Sets the _id property required by pouch
+  function setIdsToVariables(variables) {
+    var variablesToPouch = [];
+    var variableToPouch = {};
+    variables.forEach(function (variable, index) {
+      variableToPouch = variable;
+      variableToPouch._id = variable.id.toString();
+      variablesToPouch.push(variableToPouch);
+    });
+    return variablesToPouch;
+  }
+
 });
