@@ -42,11 +42,12 @@
   <script src="services/indicators.js"></script>
   <script src="services/variables.js"></script>
   <script src="services/evaluations.js"></script>
+  <script src="services/scores.js"></script>
   <!-- <script src="/controllers/mainController.js"></script> -->
   <!-- <script src="/controllers/authController.js"></script> -->
   
   <!-- Load js assets -->
-  <script src="../app/assets/js/custom.js"></script>
+  <script src="assets/js/custom.js"></script>
 
 </head>
 <body ng-controller="mainController" class="grey lighten-5">
@@ -54,7 +55,7 @@
     <main ng-class="{ 'full-width': !loggedIn }">
       <nav class="teal">
         <div class="nav-wrapper">
-            <a href="#" data-activates="slide-out" class="button-collapse"><i class="material-icons">menu</i></a>
+            <a href="#" ng-show="loggedIn" data-activates="slide-out" class="button-collapse"><i class="material-icons">menu</i></a>
             <a href="#" class="brand-logo center">Agroind</a>
         </div>
         <ul ng-show="loggedIn" id="slide-out" class="side-nav fixed show-on-small">
@@ -211,21 +212,11 @@
         <div ui-view></div>
       </div>
         <!-- <span us-spinner="{radius:30, width:8, length: 16}"></span> -->
-        <a href="" ng-click="showAll()">Consultar usuarios </a>
+        <!-- <a href="" ng-click="showAll()">Consultar usuarios </a> -->
         <a href="" ng-click="checkLogin()">Cambiar logueo </a>
-        <a href="" ng-click="infoDB()">Info db</a>
-        <a href="" ng-click="deleteDB()">Delete db</a>
-<a ui-sref="home">Home</a>
-        
+        <!-- <a href="" ng-click="infoDB()">Info db</a> -->
+        <!-- <a href="" ng-click="deleteDB()">Delete db</a> -->
         <!-- <button class="btn btn-primary btn-lg" ng-click='signOut()'>Sign out</button> -->
-        <button class="btn btn-primary" ng-click="add()">Add</button>
-<!-- <div>
-  <ul>
-    <li ng-repeat="doc in docs">
-      <code ng-bind="doc | json"></code>
-    </li>
-  </ul>
-</div> -->
     </main>
 <script type="text/javascript" src="cordova.js"></script>
 </body>
