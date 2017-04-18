@@ -15,8 +15,24 @@ var evaluationsDB = pouchDB("evaluationsDB");
     return $http.get(evaluationsUrl);
   }
 
+  this.getUserEvaluations = function (evaluator_id) {
+    return $http.get(evaluationsUrl + '/evaluator/' + evaluator_id);
+  }
+
+  this.getIndicatorsAverages = function (evaluation_id) {
+    return $http.get(evaluationsUrl + '/indicators/averages/' + evaluation_id);
+  }
+
   this.newEvaluation = function (evaluation) {
     return $http.post(evaluationsUrl, evaluation);
+  }
+
+  this.saveRecommendations = function (evaluation_id, recommendations) {
+    return $http.post(evaluationsUrl + '/' + evaluation_id + '/recommendation', {id: evaluation_id, recommendations: recommendations});
+  }
+
+  this.saveAnalysis = function (evaluation_id, analysis) {
+    return $http.post(evaluationsUrl + '/' + evaluation_id + '/analysis', {id: evaluation_id, analysis: analysis});
   }
 
   this.newLocalEvaluation = function (evaluation) {
@@ -31,6 +47,22 @@ var evaluationsDB = pouchDB("evaluationsDB");
       user_id :user_id,
     };
     return $http.patch(evaluationsUrl + '/' + id, data);
+  }
+
+  this.getEvaluationAnalysis = function (evaluation_id) {
+    return $http.get(evaluationsUrl + '/' + evaluation_id + '/analysis')
+  }
+
+  this.addEvaluationAnalysis = function (evaluation_id, analysis) {
+     return $http.post(evaluationsUrl + '/' + evaluation_id + '/analysis', analysis);
+  }
+
+  this.getEvaluationRecommendations = function (evaluation_id) {
+    return $http.get(evaluationsUrl + '/' + evaluation_id + '/recommendations');
+  }
+
+  this.addEvaluationRecommendation = function (evaluation_id, recommendation) {
+     return $http.post(evaluationsUrl + '/' + evaluation_id + '/recommendations', recommendation);
   }
 
   this.getQualifications = function (evaluation_id, indicator_id) {
@@ -77,6 +109,14 @@ var evaluationsDB = pouchDB("evaluationsDB");
       evaluationsToRemote.push(evaluationToRemote);
     });
     return $http.post(evaluationsUrl + '/bulk/evaluations', evaluationsToRemote);
+  }
+
+  this.clearLocalEvaluations = function () {
+    return evaluationsDB.destroy().then(function (response) {
+      evaluationsDB = pouchDB("evaluationsDB");
+    }).catch(function (error) {
+      console.log(error);
+    });
   }
 
   // Sets the _id property required by pouch

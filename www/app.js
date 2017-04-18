@@ -12,9 +12,31 @@ var agroind = angular.module('agroind', [
   'indicatorsService',
   'variablesService',
   'evaluationsService',
-  'scoresService'
+  'scoresService',
+  'statisticsService',
+  'colorCodesService',
+  'ncy-angular-breadcrumb'
 ]);
-
+var compareTo = function() {
+    return {
+        require: "ngModel",
+        scope: {
+            otherModelValue: "=compareTo"
+        },
+        link: function(scope, element, attributes, ngModel) {
+             
+            ngModel.$validators.compareTo = function(modelValue) {
+                return modelValue == scope.otherModelValue;
+            };
+ 
+            scope.$watch("otherModelValue", function() {
+                ngModel.$validate();
+            });
+        }
+    };
+};
+ 
+agroind.directive("compareTo", compareTo);
 agroind.factory('ConnectionStatus', function($rootScope, $q) {
   return {
     request: function(config) {
@@ -39,9 +61,12 @@ agroind.factory('ConnectionStatus', function($rootScope, $q) {
 });
 
 agroind.constant('config', {
-  // apiUrl: 'http://localhost:3000/api/v1',
-  apiUrl: 'https://agroind-api-jsvelasquezv.c9users.io/api/v1',
-  localDBName: "agroind-local"
+ //apiRoot: 'http://localhost:3000',
+   apiRoot: 'http://ec2-54-207-63-95.sa-east-1.compute.amazonaws.com:3000',
+ //apiUrl: 'http://localhost:3000/api/v1',
+   apiUrl: 'http://ec2-54-207-63-95.sa-east-1.compute.amazonaws.com:3000/api/v1',
+  // apiUrl: 'https://agroind-api-jsvelasquezv.c9users.io/api/v1',
+  // localDBName: "agroind-local"
 });
 
 // Configuration of router service
@@ -49,15 +74,18 @@ agroind.config(function($stateProvider, $urlRouterProvider, $httpProvider) {
 
   $httpProvider.interceptors.push('ConnectionStatus');
 
-  $urlRouterProvider.otherwise("/login");
+  $urlRouterProvider.otherwise("/");
 
   $stateProvider
     .state('home', {
-      url: '/',
+      url: '/home',
       templateUrl: 'pages/home.html',
+      ncyBreadcrumb: {
+        label: 'Home'
+      }
     })
     .state('login', {
-      url: '/login',
+      url: '/',
       templateUrl: 'pages/login.html'
       // controller: 'authController'
     })
@@ -205,61 +233,66 @@ agroind.config(function($stateProvider, $urlRouterProvider, $httpProvider) {
       templateUrl: 'pages/qualifications/local/indicator.html',
       controller: 'evaluationsController'
     })
+    .state('ranking', {
+      url: '/ranking',
+      templateUrl: 'pages/statistics/rankings.html',
+      controller: 'statisticsController'
+    })
+    .state('radarGraphicDates', {
+      url: '/radarGraphicDates',
+      templateUrl: 'pages/statistics/average_radar_graphic.html',
+      controller: 'statisticsController'
+    })
+    .state('evaluationReport', {
+      url: '/evaluationReport/:evaluation_id',
+      templateUrl: 'pages/statistics/evaluation_report.html',
+      controller: 'statisticsController'
+    })
+    .state('recommendations', {
+      url: '/recommendations/:evaluation_id',
+      templateUrl: 'pages/evaluations/recommendations.html',
+      controller: 'evaluationsController'
+    })
+    .state('colorCodes', {
+      url: '/colorCode',
+      templateUrl: 'pages/colorCodes/index.html',
+      controller: 'colorCodesController'
+    })
+    .state('editColorCode', {
+      url: '/editColorCode/:id',
+      templateUrl: 'pages/colorCodes/edit.html',
+      controller: 'colorCodesController'
+    })
 });
 
 //Configuration of authentication service
 agroind.config(function($authProvider) {
   $authProvider.configure({
-    // apiUrl: 'http://localhost:3000/api/v1',
-    apiUrl: 'https://agroind-api-jsvelasquezv.c9users.io/api/v1',
+   //apiUrl: 'http://localhost:3000/api/v1',
+      apiUrl: 'http://ec2-54-207-63-95.sa-east-1.compute.amazonaws.com:3000/api/v1',
+     //apiUrl: 'https://agroind-api-jsvelasquezv.c9users.io/api/v1',
     storage: 'localStorage'
   });
 });
 
-
-// agroind.config(['cfpLoadingBarProvider', function(cfpLoadingBarProvider) {
-//   cfpLoadingBarProvider.parentSelector = '#spinner-container';
-// }]);
-
 //Controladores
 
-agroind.controller('mainController', function($scope, $rootScope, $state, pouchDB, Users, Profiles, config) {
-    
+agroind.controller('mainController', function($scope, $rootScope, $state, $http, pouchDB, Users, Profiles, Lands, Indicators, Variables, Evaluations, Scores, config) {
 
-    // ********** pouchdb test 
-
-  // var db = pouchDB($state.current.name);
-  // var db2 = pouchDB("holi");
-  // var db = pouchDB("landsDB");
-  
-  // $rootScope.loggedIn = false;
-  // $rootScope.online = false;
-
-
-  $rootScope.$on("offline", function () {
-    Materialize.toast("Disconnected");
-    $rootScope.online = true;
-  });
+  $scope.reconnect = function () {
+    $http.get(config.apiRoot + '/ping').then(function (response) {
+      if (response.data == 'ok') {
+        Materialize.toast('Conectado', 4000);
+        $rootScope.online = true;
+      }
+    })
+  }
 
   $scope.checkLogin = function () {
-    config.apiUrl;
+    // config.apiUrl;
     $rootScope.loggedIn = !$rootScope.loggedIn;
+    // $rootScope.online = false;
   };
-
-  $scope.infoDB = function () {
-    // Lands.dbInfo().then(function (info) {
-    //   console.log(info);
-    // });
-    console.log($rootScope.online);
-  };
-  // $scope.deleteDB = function () {
-  //   db.destroy().then(function (response) {
-  //     console.log(response);
-  //   });
-  //   // db2.destroy().then(function (response) {
-  //   //   console.log(response);
-  //   // })
-  // };
 
   $rootScope.$on('auth:login-success', function(ev, user) {
     Materialize.toast('Inicio de sesion correcto!', 4000);
@@ -278,12 +311,10 @@ agroind.controller('mainController', function($scope, $rootScope, $state, pouchD
   $scope.$on('auth:registration-email-success', function(ev, message) {
     Materialize.toast('Registro de usuario correcto!', 4000);
     $state.go('users');
-    console.log(message);
   });
 
   $scope.$on('auth:registration-email-error', function(ev, reason) {
     Materialize.toast('Error al registrar el usuario!', 4000);
-    console.log(reason.errors);
   });
 
   $scope.$on('auth:account-update-success', function(ev) {
@@ -312,13 +343,73 @@ agroind.controller('mainController', function($scope, $rootScope, $state, pouchD
     Materialize.toast('No');
   });
 
+  $scope.syncLands = function () {
+    Lands.getLands().then(function (response) {
+      $scope.allLands = response.data;
+      Lands.saveToLocal($scope.allLands).then(function (response) {
+        Materialize.toast("Se ha sincronizado correctamente la información");
+      });
+    })
+    .catch(function (error) {
+      Materialize.toast("Error al sincronizar la información");
+    });
+  }
+
+  $scope.syncIndicators = function () {
+    Indicators.getIndicators().then(function (response) {
+      $scope.allIndicators = response.data;
+      Indicators.saveToLocal($scope.allIndicators).then(function (response) {
+        Materialize.toast("Se ha sincronizado correctamente la información");
+        $scope.allIndicators = null;
+      });
+    })
+    .catch(function (error) {
+      Materialize.toast("Error al sincronizar la información");
+    });
+  }
+
+  $scope.syncVariables = function () {
+    Variables.getVariables().then(function (response) {
+      $scope.allVariables = response.data;
+      Variables.saveToLocal($scope.allVariables).then(function (response) {
+        Materialize.toast("Se ha sincronizado correctamente la información", 4000);
+        $scope.allVariables = null;
+      });
+    })
+    .catch(function (error) {
+      Materialize.toast("Error al sincronizar la información", 4000);
+    });
+  }
+
+  $scope.clearLocalScores = function() {
+    Scores.clearLocalScores();
+    // .then(function (response) {
+    //   Materialize.toast("Datos eliminados", 4000);
+    // }).catch(function (error) {
+    //   console.log(error);
+    // })
+  }
+
+  $scope.syncEvaluations = function () {
+    Scores.pushToRemote().then(function (responsePushScores) {
+      Materialize.toast("Calificaciones cargadas correctamente", 4000);
+      Scores.clearLocalScores();
+      Evaluations.getUserEvaluations($rootScope.loggedUser.id).then(function (responseGetEvaluations) {
+        Evaluations.saveToLocal(responseGetEvaluations.data).then(function (responseSaveEvaluations) {
+          Materialize.toast("Evaluaciones sincronizadas correctamente", 4000);
+        })
+      })
+    }).catch(function (error) {
+      console.log(error);
+    });
+  }
+
 });
 
 //Controlador para la gestion de usuarios
 agroind.controller('usersController', function ($scope, $rootScope, $stateParams, $state, $auth, Users, config, Profiles) {
 
  $scope.loadMyAccountForm = function () {
-    // console.log($scope.updateAccountForm);
     var user = $rootScope.loggedUser;
     $scope.updateAccountForm = {
       name: user.name,
@@ -342,7 +433,6 @@ agroind.controller('usersController', function ($scope, $rootScope, $stateParams
   }
 
   $scope.newUser = function () {
-    console.log($scope.newUserForm);
     Users.newUser($scope.newUserForm).then(function (response) {
       Materialize.toast("Usuario registrado correctamente", 4000);
       $state.go('users');
@@ -378,7 +468,7 @@ agroind.controller('usersController', function ($scope, $rootScope, $stateParams
       $scope.indexUser();
       Materialize.toast('Se ha eliminado el usuario', 4000);
     });
-  }
+  }  
 
 });
 
@@ -392,16 +482,8 @@ agroind.controller('profilesController', function ($scope, $stateParams, $state,
   }
 
   $scope.viewProfile = function () {
-    // console.log($stateParams);
     Profiles.getProfile($stateParams.id).then(function (response) {
-        // console.log(response.data);
       $scope.profile = {
-        // id: response.data.id,
-        // name: response.data.name,
-        // users_permission: response.data.users_permission,
-        // indicators_permission: response.data.indicators_permission,
-        // reports_permission: response.data.reports_permission,
-        // profiles_permission: response.data.profiles_permission
         id: response.data.id,
         name: response.data.name,
         users_permission: response.data.users_permission,
@@ -418,7 +500,6 @@ agroind.controller('profilesController', function ($scope, $stateParams, $state,
         edit_profiles: response.data.edit_profiles,
         clone_profiles: response.data.clone_profiles
       }
-      // console.log($scope.profile);
     });
   }
 
@@ -500,7 +581,6 @@ agroind.controller('profilesController', function ($scope, $stateParams, $state,
 
   $scope.deleteProfile = function (id) {
     Profiles.deleteProfile(id).then(function (response) {
-      // $scope.allProfiles.splice(id,1);
       $scope.indexProfile();
       console.log("Perfil eliminado correctamente");
     });
@@ -667,7 +747,7 @@ agroind.controller('variablesController', function ($scope, $stateParams, $state
 
 });
 
-agroind.controller('evaluationsController', function ($scope, $rootScope, $stateParams, $state, Indicators, Lands, Evaluations, Variables, Scores, config) {
+agroind.controller('evaluationsController', function ($scope, $rootScope, $stateParams, $state, Indicators, Users, Lands, Evaluations, Variables, Scores, config) {
   
   $scope.scores = {};
   $scope.localScores = {};
@@ -711,12 +791,25 @@ agroind.controller('evaluationsController', function ($scope, $rootScope, $state
     Indicators.getIndicators().then(function (response) {
       $scope.allIndicators = response.data;
     });
+    Evaluations.getEvaluation($stateParams.evaluation_id).then(function (response) {
+      $scope.evaluation = response.data;
+      $scope.recommendations = $scope.evaluation.recommendations;
+      $scope.analysis = $scope.evaluation.analysis;
+    })
   }
+
+  // $scope.saveRecommendation
 
   $scope.allLands = function () {
     Lands.getLands().then(function (response) {
       $scope.allLands = response.data;
     });
+  }
+
+  $scope.allUsers = function () {
+    Users.getUsers().then(function (response) {
+      $scope.allUsers = response.data;
+    })
   }
 
   $scope.allEvaluations = function () {
@@ -725,14 +818,35 @@ agroind.controller('evaluationsController', function ($scope, $rootScope, $state
     });
   }
 
+  $scope.getIndicatorsAverages = function () {
+    Evaluations.getIndicatorsAverages($stateParams.evaluation_id).then(function (response) {
+      $scope.allIndicatorsAverages = response.data;
+    });
+  }
+
   $scope.newEvaluation = function () {
     var evaluation = {
       land_id: $scope.land_id,
-      user_id: $rootScope.loggedUser.id
+      user_id: $rootScope.loggedUser.id,
+      assignment_date: $scope.assignment_date,
+      evaluator_id: $scope.evaluator_id
     }
+    // console.log(evaluation);
     Evaluations.newEvaluation(evaluation).then(function (response) {
       Materialize.toast("Evaluacion creada", 4000);
       $state.go('evaluations');
+    });
+  }
+
+  $scope.saveRecommendations = function () {
+    Evaluations.saveRecommendations($stateParams.evaluation_id, $scope.recommendations).then(function (response) {
+      Materialize.toast("Se ha guardado la recomendación", 4000);
+    });
+  }
+
+  $scope.saveAnalysis = function () {
+    Evaluations.saveAnalysis($stateParams.evaluation_id, $scope.analysis).then(function (response) {
+      Materialize.toast("Se ha guardado el analisis", 4000);
     });
   }
 
@@ -876,33 +990,98 @@ agroind.controller('evaluationsController', function ($scope, $rootScope, $state
     if ($scope.qualificationsRevision) {
       data._rev = $scope.qualificationsRevision;
     }
-    // if (qualifications.length > 0) {
+    if (qualifications.length > 0) {
       Scores.saveToLocal(data).then(function (response) {
         Materialize.toast("Calificacion registrada correctamente", 4000);
       }).catch(function (error) {
         console.log(error);
       });
-    // }
+    }
   }
 
-  $scope.loadScores = function () {
-    Scores.pushToRemote().then(function (response) {
-      console.log(response);
-    }).catch(function (error) {
-      console.log(error);
-    })
-  }
+  // $scope.loadScores = function () {
+  //   Scores.pushToRemote().then(function (response) {
+  //     console.log(response);
+  //   }).catch(function (error) {
+  //     console.log(error);
+  //   })
+  // }
 
 });
 
-// agroind.controller('qualificationsController', function ($scope, $rootScope, $stateParams, $state, Indicators, Evaluations, config) {
+agroind.controller('statisticsController', function ($scope, $stateParams, $state, Statistics, config) {
   
-//   $scope.allIndicators = function () {
-//     Indicators.getIndicators().then(function (response) {
-//       $scope.allIndicators = response.data;
-//     });
-//   }
-// });
+  $scope.loadEvaluationReport = function () {
+    Statistics.getEvaluationReport().then(function (response) {
+      $scope.evaluationReport = response.data;
+    })
+  }
+
+  $scope.loadBestRanking = function () {
+    Statistics.getBestRanking().then(function (response) {
+      $scope.bestRanking = response.data;
+    })
+  }
+
+  $scope.loadWorstRanking = function () {
+    Statistics.getWorstRanking().then(function (response) {
+      $scope.worstRanking = response.data;
+    })
+  }
+
+  $scope.loadAverageRadarDates = function () {
+    Statistics.getRadarData($scope.start_date, $scope.end_date).then(function (response) {
+      var ctx = document.getElementById("average-radar-dates-graphic");
+      $scope.summary = response.data.summary;
+      var data = {
+        labels: response.data.labels,
+        datasets: response.data.datasets
+      };
+      var averageRadarChartDates = new Chart(ctx, {
+        type: 'radar',
+        data: data
+      });
+    })
+  }
+
+  $scope.loadEvaluationReport = function () {
+    Statistics.getEvaluationReport($stateParams.evaluation_id).then(function (response) {
+      $scope.evaluation_report = response.data;
+      console.log(response.data);
+      chartData = response.data.chartData;
+      console.log(chartData);
+      var ctx = document.getElementById("average-radar-indicator-chart");
+      var averageRadarChartIndicator = new Chart(ctx, {
+        type: 'radar',
+        data: chartData
+      });
+    })
+  }
+  
+});
+
+agroind.controller('colorCodesController', function ($scope, $stateParams, $state, config, ColorCodes) {
+  
+  $scope.allColorCodes = function () {
+    ColorCodes.getColorCodes().then(function (response) {
+      $scope.allColorCodes = response.data;
+    });
+  }
+
+  $scope.loadColorCode = function () {
+    ColorCodes.getColorCode($stateParams.id).then(function (response) {
+      $scope.colorCode = response.data;
+    });
+  }
+
+  $scope.editColorCode = function () {
+    ColorCodes.editColorCode($scope.colorCode).then(function (response) {
+      $scope.colorCode = response.data;
+      Materialize.toast('El estado de alerta se ha actualizado correctamente', 4000);
+      $state.go('colorCodes');
+    });
+  }
+})
 
 //Controlador de autenticacion
 
@@ -959,6 +1138,7 @@ agroind.controller('authController', function ($scope, $auth, $rootScope) {
         .catch(function(resp) {
           // handle error response
         });
+
     };
 
 });

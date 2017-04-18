@@ -1,21 +1,44 @@
+<ul class="breadcrumb">
+  <li><a ui-sref="home">Home</a></li>
+  <li><a ui-sref="evaluations">Evaluaciones</a></li>
+  <li>Indicadores</li>
+  </ul>
 <div class="row">
   <div class="col l12 s12 m12">
     <div class="card-panel">
       <h3>Calificar indicadores</h3>
-      <table ng-init="allIndicators()" class="responsive-table highlight bordered">
+      <table ng-init="allIndicators(); getIndicatorsAverages();" class="responsive-table highlight bordered">
         <thead>
           <tr>
             <th>Nombre</th>
           </tr>
         </thead>
         <tbody>
-          <tr ng-repeat="indicator in allIndicators">
+          <tr ng-repeat="indicator in allIndicators" ng-class="{qualified: allIndicatorsAverages[indicator.id][0].qualification_percentage == 100}">
             <td>{{indicator.name}}</td>
-            <!-- <td><a ng-click="delete(land.id)">Eliminar</a></td> -->
+            <td><span ng-show="allIndicatorsAverages[indicator.id][0].qualification_percentage == 100" class="material-icons">check_circle</span></td>
             <td><a ui-sref="qualifyIndicator({indicator_id: indicator.id})">Calificar</a></td>
           </tr>
         </tbody>
       </table>
+      <br ng-init="getEvaluation()">
+      <div class="row">
+        <h5>Recomendaciones</h5>
+        <form novalidate role="form" name="formRecommendations">
+            <textarea name="formRecommendations" ng-model="recommendations" class="materialize-textarea" id="recommendations" cols="30" rows="10" required>
+            </textarea>
+        </form>
+        <button ng-click="saveRecommendations()" class="btn" ng-disabled="formRecommendations.$invalid" ng-class="{disabled: formRecommendations.$invalid}">Guardar recomendaciones</button>
+      </div>
+
+      <div class="row">
+        <h5>Analisis</h5>
+        <form novalidate role="form" name="formAnalysis">
+            <textarea name="formAnalysis" ng-model="analysis" class="materialize-textarea" id="analysis" cols="30" rows="10" required>
+            </textarea>
+        </form>
+        <button ng-click="saveAnalysis()" class="btn" ng-disabled="formAnalysis.$invalid" ng-class="{disabled: formAnalysis.$invalid}">Guardar analisis</button>
+      </div>
     </div>
   </div>
 </div>

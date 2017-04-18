@@ -23,7 +23,10 @@
   <!-- Load materialize -->
   <script src="bower_components/Materialize/dist/js/materialize.min.js"></script>
 
-   <!-- Load angular -->
+  <!-- Load chart.js -->
+  <script src="bower_components/chart.js/dist/Chart.bundle.min.js"></script>
+
+  <!-- Load angular -->
   <script src="bower_components/angular/angular.min.js"></script>
   <script src="node_modules/pouchdb/dist/pouchdb.min.js"></script>
   <script src="bower_components/angular-ui-router/release/angular-ui-router.min.js"></script>
@@ -34,6 +37,8 @@
   <script src="bower_components/angular-animate/angular-animate.min.js"></script>
   <script src="bower_components/angular-messages/angular-messages.min.js"></script>
   <script src="bower_components/angular-pouchdb/angular-pouchdb.min.js"></script>
+  <script src="bower_components/angular-breadcrumb/dist/angular-breadcrumb.min.js"></script>
+  <script src="bower_components/Materialize/extras/noUiSlider/nouislider.min.js"></script>
   <script src="app.js"></script>
   <!-- <script src="services/connectionStatus.js"></script> -->
   <script src="services/users.js"></script>
@@ -41,8 +46,12 @@
   <script src="services/lands.js"></script>
   <script src="services/indicators.js"></script>
   <script src="services/variables.js"></script>
+  <script src="services/scores.js"></script>
   <script src="services/evaluations.js"></script>
   <script src="services/scores.js"></script>
+  <script src="services/statistics.js"></script>
+  <script src="services/colorCodes.js"></script>
+
   <!-- <script src="/controllers/mainController.js"></script> -->
   <!-- <script src="/controllers/authController.js"></script> -->
   
@@ -50,20 +59,21 @@
   <script src="assets/js/custom.js"></script>
 
 </head>
-<body ng-controller="mainController" class="grey lighten-5">
-    
+<body ng-controller="mainController" class="grey lighten-5">  
+
     <main ng-class="{ 'full-width': !loggedIn }">
       <nav class="teal">
         <div class="nav-wrapper">
             <a href="#" ng-show="loggedIn" data-activates="slide-out" class="button-collapse"><i class="material-icons">menu</i></a>
             <a href="#" class="brand-logo center">Agroind</a>
         </div>
+        <!--div ncy-breadcrumb-text></div>-->
         <ul ng-show="loggedIn" id="slide-out" class="side-nav fixed show-on-small">
 
             <li>
               <a ui-sref="home" class="collapsible-header" ng-show="loggedIn">
                 <i class="material-icons menu-icons">dashboard</i>
-                Inicio
+                <b>Inicio</b>
               </a>
             </li>  
             <!-- <li>
@@ -75,7 +85,7 @@
             <li>
               <a ui-sref="myAccount" class="collapsible-header" ng-show="loggedIn">
                 <i class="material-icons menu-icons">picture_in_picture</i>
-                Mi cuenta
+                <b>Mi cuenta</b>
               </a>
             </li>
             <!-- <li>
@@ -90,7 +100,7 @@
                 <li>
                   <a class="collapsible-header">
                     <i class="material-icons menu-icons">assignment_ind</i>
-                    Gestionar Perfiles
+                    <b>Gestionar Perfiles</b>
                   </a>
                   <div class="collapsible-body">
                     <ul>
@@ -111,7 +121,7 @@
                 <li>
                   <a class="collapsible-header">
                     <i class="material-icons menu-icons">supervisor_account</i>
-                    Gestionar Usuarios
+                    <b>Gestionar Usuarios</b>
                   </a>
                   <div class="collapsible-body">
                     <ul>
@@ -130,44 +140,75 @@
               <ul class="collapsible collapsible-accordion">
                 <li>
                   <a class="collapsible-header">
-                    <i class="material-icons menu-icons">trending_up</i>
-                    Indicadores
+                    <i class="material-icons menu-icons">store</i>
+                    <b>Fincas</b>
                   </a>
                   <div class="collapsible-body">
                     <ul>
-                      <li><a ui-sref="indicators">Listado de Indicadores</a></li>
-                      <li><a ui-sref="localIndicators">Listado de Indicadores Local</a></li>
-                      <li><a ui-sref="newIndicator">Crear Indicador</a></li>
-                      <li><a ui-sref="variables">Listado de Variables</a></li>
-                      <li><a ui-sref="localVariables">Listado de Variables Local</a></li>
-                      <li><a ui-sref="newVariable">Crear Variable</a></li>
-                      <li><a ui-sref="lands">Listado de Fincas</a></li>
-                      <li><a ui-sref="localLands">Listado de Fincas Local</a></li>
-                      <li><a ui-sref="newLand">Registrar Finca</a></li>
-                      <li><a ui-sref="evaluations">Listado de Evaluaciones</a></li>
-                      <li><a ui-sref="localEvaluations">Listado de Evaluaciones Local</a></li>
-                      <li><a ui-sref="newEvaluation">Asignar Evaluacion</a></li>
-                      <li><a ui-sref="newLocalEvaluation">Asignar Evaluacion Local</a></li>
-                      <!-- <li><a ui-sref="newCalification">Calificar evaluaciones</a></li> -->
+                        <li ng-show="online == 'on'"><a ui-sref="lands">Listado de Fincas</a></li>
+                        <li ng-show="online == 'off'"><a ui-sref="localLands">Listado de Fincas Local</a></li>
+                        <li ng-show="online == 'on'"><a ui-sref="newLand">Registrar Finca</a></li>
+                        <li ng-show="online == 'on'"><a ng-click="syncLands()">Sincronizar Fincas</a></li>
                     </ul>
                   </div>
                 </li>
               </ul>
             </li>
 
-            <li class="no-padding" ng-show="loggedIn && loggedProfile.reports_permission">
+            <li class="no-padding" ng-show="loggedIn && loggedProfile.indicators_permission">
               <ul class="collapsible collapsible-accordion">
                 <li>
                   <a class="collapsible-header">
-                    <i class="material-icons menu-icons">description</i>
-                    Reportes
+                    <i class="material-icons menu-icons">trending_up</i>
+                    <b>Indicadores</b>
                   </a>
                   <div class="collapsible-body">
                     <ul>
-                      <li ng-show="loggedIn && loggedProfile.list_users">
-                        <a ui-sref="users">Listado de usuarios</a>
-                      </li>
-                      <li><a ui-sref="signup">Crear Usuario</a></li>
+                      <li ng-show="online == 'on'"><a ui-sref="indicators">Listado de Indicadores</a></li>
+                      <li ng-show="online == 'off'"><a ui-sref="localIndicators">Listado de Indicadores Local</a></li>
+                      <li ng-show="online == 'on'"><a ui-sref="newIndicator">Crear Indicador</a></li>
+                      <li ng-show="online == 'on'"><a ng-click="syncIndicators()">Sincronizar Indicadores</a></li>
+                      <!-- <li><a ui-sref="newCalification">Calificar evaluaciones</a></li> -->
+                      <!-- <li><a ui-sref="newLocalEvaluation">Asignar Evaluacion Local</a></li> -->
+                    </ul>
+                  </div>
+                </li>
+              </ul>
+            </li>
+
+            <li class="no-padding" ng-show="loggedIn && loggedProfile.indicators_permission">
+              <ul class="collapsible collapsible-accordion">
+                <li>
+                  <a class="collapsible-header">
+                    <i class="material-icons menu-icons">subject</i>
+                    <b>Variables</b>
+                  </a>
+                  <div class="collapsible-body">
+                    <ul>
+                      <li ng-show="online == 'on'"><a ui-sref="variables">Listado de Variables</a></li>
+                      <li ng-show="online == 'off'"><a ui-sref="localVariables">Listado de Variables Local</a></li>
+                      <li ng-show="online == 'on'"><a ui-sref="newVariable">Crear Variable</a></li>
+                      <li ng-show="online == 'on'"><a ng-click="syncVariables()">Sincronizar Variables</a></li>
+                    </ul>
+                  </div>
+                </li>
+              </ul>
+            </li>
+
+            <li class="no-padding" ng-show="loggedIn && loggedProfile.indicators_permission">
+              <ul class="collapsible collapsible-accordion">
+                <li>
+                  <a class="collapsible-header">
+                    <i class="material-icons menu-icons">receipt</i>
+                    <b>Evaluaciones</b>
+                  </a>
+                  <div class="collapsible-body">
+                    <ul>
+                      <li ng-show="online == 'on'"><a ui-sref="evaluations">Listado de Evaluaciones</a></li>
+                      <li ng-show="online == 'on'"><a ui-sref="localEvaluations">Listado de Evaluaciones Local</a></li>
+                      <li ng-show="online == 'on'"><a ui-sref="newEvaluation">Asignar Evaluación</a></li>
+                      <li ng-show="online == 'on'"><a ng-click="syncEvaluations()">Sincronizar evaluaciones</a></li>
+                      <li ng-show="online == 'on'"><a ui-sref="colorCodes">Estado de alerta</a></li>
                     </ul>
                   </div>
                 </li>
@@ -179,43 +220,73 @@
                 <li>
                   <a class="collapsible-header">
                     <i class="material-icons menu-icons">assessment</i>
-                    Estadistica
+                    <b>Estadistica</b>
                   </a>
                   <div class="collapsible-body">
                     <ul>
-                      <li ng-show="loggedIn && loggedProfile.list_users">
-                        <a ui-sref="users">Listado de usuarios</a>
+                      <li ng-show="loggedIn">
+                        <a ui-sref="ranking">Ranking</a>
                       </li>
-                      <li><a ui-sref="signup">Crear Usuario</a></li>
+                      <li ng-show="loggedIn">
+                        <a ui-sref="radarGraphicDates">Promedio General</a>
+                      </li>
+                      <!-- <li>
+                        <a ui-sref="evaluationReport({evaluation_id: 1})">Promedio General</a>
+                      </li> -->
                     </ul>
                   </div>
                 </li>
               </ul>
             </li>
 
+            <!-- <li class="no-padding" ng-show="loggedIn">
+              <ul class="collapsible collapsible-accordion">
+                <li>
+                  <a class="collapsible-header" ng-click="">
+                    <i class="material-icons menu-icons">autorenew</i>
+                    <b>Sincronizar Datos</b>
+                  </a> -->
+                  <!-- <div class="collapsible-body">
+                    <ul>
+                      <li ng-show="loggedIn">
+                        <a ui-sref="ranking">Ranking</a>
+                      </li>
+                      <li ng-show="loggedIn">
+                        <a ui-sref="radarGraphicDates">Promedio General</a>
+                      </li>
+                      <li>
+                        <a ui-sref="evaluationReport({evaluation_id: 1})">Promedio General</a>
+                      </li>
+                    </ul>
+                  </div> -->
+                <!-- </li>
+              </ul>
+            </li> -->
+
             <li>
               <a ng-click='signOut()' class="collapsible-header" ng-show="loggedIn">
                 <i class="material-icons menu-icons">power_settings_new</i>
-                Cerrar sesion</a>  
+                <b>Cerrar sesion</b>
+              </a>
             </li>
         </ul>
       </nav>
 
       <div class="notification blue white-text row" ng-show="online == 'off'">
         <div class="col right">
-          <a href="" class="btn btn-flat white-text waves-effect waves-light blue" style="text-transform: capitalize;">
+          <a href="" class="btn btn-flat white-text waves-effect waves-light blue" style="text-transform: capitalize;" ng-click=reconnect()>
             <i class="material-icons left" style="margin-right: 0;">swap_vert</i>Volver a conectar.
           </a>
         </div>
       </div>
-      <div class="container">
+      <div class="container-fluid">
         <div ui-view></div>
       </div>
         <!-- <span us-spinner="{radius:30, width:8, length: 16}"></span> -->
         <!-- <a href="" ng-click="showAll()">Consultar usuarios </a> -->
-        <a href="" ng-click="checkLogin()">Cambiar logueo </a>
+        <!--<a href="" ng-click="checkLogin()">Cambiar logueo </a> -->
         <!-- <a href="" ng-click="infoDB()">Info db</a> -->
-        <!-- <a href="" ng-click="deleteDB()">Delete db</a> -->
+        <!--<a href="" ng-click="clearLocalScores()">Delete db</a> -->
         <!-- <button class="btn btn-primary btn-lg" ng-click='signOut()'>Sign out</button> -->
     </main>
 <script type="text/javascript" src="cordova.js"></script>

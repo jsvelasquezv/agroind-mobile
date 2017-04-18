@@ -1,0 +1,68 @@
+<div class="row">
+    <div class="col s12 m12 l6">
+        <div class="card-panel">
+            <label for="start_date">Fecha inicial</label>
+            <input type="text" class="datepicker" ng-model="start_date" name="start_date">
+        </div>
+    </div>
+    <div class="col s12 m12 l6">
+        <div class="card-panel">
+            <label for="start_date">Fecha final</label>
+            <input type="text" class="datepicker" ng-model="end_date" name="end_date">
+        </div>
+    </div>
+    <div class="col m12">
+        <button class="btn btn-primary" ng-click="loadAverageRadarDates()">Consultar reporte</button>
+    </div>
+</div>
+<div class="row">
+  <div class="col s12 m12 l12">
+    <div class="card-panel"><h4>Resumen</h4>
+      <table class="bordered">
+        <thead>
+          <tr>
+            <th>Indicador</th>
+            <th>Total</th>
+          </tr> 
+        </thead> 
+        <tbody>      
+          <tr ng-repeat="average in summary">
+            <td> {{average.indicator}}</td>
+            <td style="background: {{average.color}};"> {{average.value | number:2}} </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+<div id="reporteEvaluacion" class="row" pdf-save-content="idOne">
+    <div class="col s12 m12 l12">
+        <div class="card-panel">
+            <canvas id="average-radar-dates-graphic"></canvas>
+        </div>
+    </div>
+</div>
+<div class="fixed-action-btn">
+  <a class="btn-floating btn-large waves-effect waves-light red" onclick="exportReport()"><i class="material-icons">file_download</i></a>
+</div>
+<script>
+    $(document).ready(function() {
+        $('.datepicker').pickadate({
+            selectMonths: true, // Creates a dropdown to control month
+            selectYears: 15, // Creates a dropdown of 15 years to control year
+            format: 'yyyy-mm-dd',
+            formatSubmit: 'yyyy-mm-dd'
+        });
+    });
+
+    function exportReport() {
+  html2canvas($("#reporteEvaluacion"), {
+    onrendered: function(canvas) {         
+      var imgData = canvas.toDataURL("image/png");
+      var doc = new jsPDF('', 'mm', [canvas.width, canvas.height]);
+      doc.addImage(imgData, 'png', 0, 0, canvas.width, canvas.height);
+      doc.save('sample-file.pdf');
+    }
+  });
+}
+</script>
