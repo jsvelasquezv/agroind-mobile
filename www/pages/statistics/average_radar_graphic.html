@@ -42,9 +42,9 @@
         </div>
     </div>
 </div>
-<div class="fixed-action-btn">
+<!--<div class="fixed-action-btn">
   <a class="btn-floating btn-large waves-effect waves-light red" onclick="exportReport()"><i class="material-icons">file_download</i></a>
-</div>
+</div> -->
 <script>
     $(document).ready(function() {
         $('.datepicker').pickadate({
@@ -55,7 +55,7 @@
         });
     });
 
-    function exportReport() {
+ /*   function exportReport() {
   html2canvas($("#reporteEvaluacion"), {
     onrendered: function(canvas) {         
       var imgData = canvas.toDataURL("image/png");
@@ -64,5 +64,5 @@
       doc.save('sample-file.pdf');
     }
   });
-}
+}*/
 </script>
